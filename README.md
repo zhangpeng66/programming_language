@@ -245,3 +245,144 @@ int main()
 ![alt text](image-1.png)
 输出left_valid和right_valid的回溯过程
 ![alt text](image-2.png)
+
+二叉搜索树的插入与公共祖先问题 
+```C++
+class Solution {
+public:
+    
+    //递归与回溯
+    TreeNode* insertBinarySearchTree(TreeNode* root, int val) {
+        if (root == NULL) {
+            return new TreeNode(val);
+        }
+        if (val < root->val) {
+            root->left = insertBinarySearchTree(root->left, val);
+            std::cout<<"left node value: "<<root->left->val<<std::endl;
+        } else {
+            root->right = insertBinarySearchTree(root->right, val);
+            std::cout<<"right node value: "<<root->right->val<<std::endl;
+        }
+        if(root!=NULL)
+        {
+            std::cout<<"cur node value: "<<root->val<<std::endl;
+        }
+        return root;
+
+    }
+    TreeNode* findCommonAncestor(TreeNode* root,int p, int q) {
+        if (root == NULL) return NULL;
+        if (root->val == p || root->val == q) return root;
+        
+        if(p < root->val && q < root->val) {
+            TreeNode* leftAncestor = findCommonAncestor(root->left, p, q);
+            if(leftAncestor!= NULL) {
+                std::cout<<"Left ancestor found: " << leftAncestor->val << std::endl;
+            } else {
+                std::cout<<"Left ancestor not found."<<std::endl;
+            }
+            return leftAncestor;
+        } else if (p > root->val && q > root->val) {
+            TreeNode* rightAncestor = findCommonAncestor(root->right, p, q);
+            if(rightAncestor!= NULL) {
+                std::cout<<"Right ancestor found: " << rightAncestor->val << std::endl;
+            } else {
+                std::cout<<"Right ancestor not found."<<std::endl;
+            }
+            return rightAncestor;
+        } 
+
+        std::cout << "Common ancestor found: " << root->val << std::endl;
+        return root; // This is the common ancestor
+        
+    }
+    void InOrderTraversal(TreeNode* root) {
+        if (root == NULL) return;
+        InOrderTraversal(root->left);
+        std::cout << root->val << " "<<std::endl;
+        InOrderTraversal(root->right);
+    }
+};
+int main()
+{
+    Solution s;
+    //6,2,8,0,4,7,9,null,null,3,5
+    TreeNode* root = new TreeNode(6);   
+    root->left = new TreeNode(2);   
+    root->right = new TreeNode(8);  
+    root->left->left = new TreeNode(0);
+    root->left->right = new TreeNode(4);    
+    root->right->left = new TreeNode(7);            
+    root->right->right = new TreeNode(9); 
+
+    root->left->right->left = new TreeNode(3);
+    root->left->right->right = new TreeNode(5); 
+
+    int val = 5;
+    //TreeNode* ancestor_node = s.insertBinarySearchTree(root,val);
+    //std::cout << "In-order traversal of the BST after insertion: "; 
+    TreeNode* ancestor_node = s.findCommonAncestor(root, 3, 5);
+    s.InOrderTraversal(ancestor_node);
+    return 0;
+}
+```
+主要区别在return上
+- 当找到公共祖先的时候，会把公共祖先树通过回溯return上去        
+![alt text](image-3.png)
+- 在插入节点的时候，走常规回溯return上去
+![alt text](image-4.png)
+![alt text](image-5.png)
+
+回溯算法
+```C++
+class Solution {
+public:
+    vector<int> path;
+    vector<vector<int>> res;
+    void backTracking(int targetSum,int sum,int k ,int startIndex) //确定函数返回值和参数
+    {
+        //std::cout<<"startIndex: " << startIndex << ", current path size: " << path.size() << endl;
+        if (k == path.size()) {//终止条件
+            if(targetSum == sum){
+                res.push_back(path);//存放结果
+            }
+            return;
+        }
+        //std::cout<<"startIndex: " << startIndex  << endl;
+        for (int i = startIndex; i <= 9; ++i) {//元素《==从集合中选择
+            if(sum + i > targetSum) {
+                // If the current sum exceeds the target, no need to continue
+                std::cout << "Current sum " << sum << " with adding " << i << " exceeds target " << targetSum << endl;
+                break;
+            }
+            std::cout << "Adding " << i << " to path" << endl;
+            path.push_back(i);
+            sum += i; // Update the sum with the current number  //处理节点
+            backTracking(targetSum,sum, k, i + 1); // Move to the next number //递归
+            path.pop_back(); // Backtrack  //回溯
+            sum-= i; // Update the sum by removing the current number
+            std::cout << "Backtracking, removing " << i << " from path" << endl;
+        }
+    }
+
+};
+int main()
+{
+    Solution s;
+    int n = 4, k = 4;
+    s.backTracking(n, k, 1);
+    for (const auto& combination : s.res) {
+        for (int num : combination) {
+            cout << num << " ";
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
+树状图如下(先执行递归，后for循环)：
+![alt text](image-6.png)
+程序执行如下图：
+![alt text](image-7.png)
+剪枝程序如下图
+![alt text](image-8.png)
